@@ -15,6 +15,10 @@ mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
+# Install pip packages
+cd
+pip3 install Flask
+
 # Set up directory & flask
 if [ ! -d "youtube-party" ]
 then
@@ -25,4 +29,3 @@ fi
 cd youtube-party
 python3 -m venv venv
 . venv/bin/activate
-pip install Flask
