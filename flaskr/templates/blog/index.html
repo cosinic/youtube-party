@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Youtube Party</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.min.css') }}">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script src="http://www.seanmccambridge.com/tubular/js/jquery.tubular.1.0.js"></script> 
+  </head>
+
+  <body>
+    <div id="tubular-container" style=" overflow: hidden; position: fixed; z-index: 1; width: 100%; height: 100%">
+      <div class="overlay"></div>
+
+
+      <div class="masthead">
+        <div class="masthead-bg"></div>
+        <div class="container h-100">
+          <div class="row h-100">
+            <div class="col-12 my-auto">
+              <div class="masthead-content text-white py-5 py-md-0">
+                <h1 class="mb-3">YouTube Party!</h1>
+                
+                <p class="mb-5">Synced <b>Youtube</b> videos to share, watch, and talk about with your friends</p>
+                <div class="input-group input-group-newsletter">
+                  <input type="email" class="form-control" placeholder="Enter room name..." aria-label="Enter email..." aria-describedby="basic-addon">
+                  <div class="input-group-append">
+                    <button class="btn btn-danger" type="button">Make Room</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var vids = ["Vb8Bwq4FppQ","6ZfuNTqbHE8","PbQyevYlLAY","c8aFcHFu8QM"];
+      
+      $('document').ready(function() { 
+        var options = {  videoId: vids[Math.floor(Math.random()*vids.length)], start: 76, repeat: true};  
+        $('#tubular-container').tubular(options); 
+      });
+    </script>
+    
+  </body>
+
+    
+
+</html>
