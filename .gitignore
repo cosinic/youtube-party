@@ -4,6 +4,8 @@ include/
 lib/
 lib64
 pyvenv.cfg
-__pycache__/
 share/
 ytparty.sock
+.vscode/
+__pycache__/
+venv/
