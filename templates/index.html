@@ -50,7 +50,12 @@
       var vids = ["Vb8Bwq4FppQ","6ZfuNTqbHE8","PbQyevYlLAY","c8aFcHFu8QM"];
       
       $('document').ready(function() { 
-        var options = {  videoId: vids[Math.floor(Math.random()*vids.length)], start: 76, repeat: true};  
+        var options = {
+          videoId: vids[Math.floor(Math.random()*vids.length)], 
+          start: 76, 
+          repeat: true,
+          ratio: $(window).width() / $(window).height() //Ratio will be dynamic according to browser window ratio
+        };  
         $('#tubular-container').tubular(options); 
       });
     </script>
