@@ -19,5 +19,13 @@ services:
     ports:
       - 8081:8080
 
+  web:
+    image: youtubeparty:0.1
+    deploy:
+      restart_policy:
+        condition: none
+    ports:
+      - 8080:5000
+
 volumes:
   youtubeparty-data:
