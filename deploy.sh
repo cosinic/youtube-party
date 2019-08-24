@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 docker stack rm youtubeparty && \
 docker build -t youtubeparty:0.1 . && \
