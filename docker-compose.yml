@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:11
+    deploy:
+      restart_policy:
+        condition: none
+    volumes:
+      - youtubeparty-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: test
+
+  adminer:
+    image: adminer:4.7.2
+    deploy:
+      restart_policy:
+        condition: none
+    ports:
+      - 8081:8080
+
+volumes:
+  youtubeparty-data:
