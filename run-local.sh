@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FLASK_APP=src/__init__.py
+export FLASK_APP=src/__init__.py
 PORT=8080
 
 if [ "$1" != "" ]; then 
