@@ -72,12 +72,23 @@ h1,h2,h3,h4,h5,h6{
     font-size:1rem;
     padding:1rem
 }
-.masthead .masthead-content .input-group-newsletter button{
-    font-size:.8rem;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:1px;padding:1rem;
-    background-color:#f22613;
+
+.masthead .masthead-content #button-list{
+    
+    z-index:999;
+    display:flex;
+    flex-direction:horizontal;
+    -webkit-box-pack:center;
+    -moz-box-pack:center;
+    -ms-flex-pack:center;
+    -webkit-justify-content:center;
+    justify-content:center;
+    -webkit-box-align:center;
+    -moz-box-align:center;
+    -ms-flex-align:center;
+    -webkit-align-items:center;
+    align-items:center;
+
 }
 
 @media (min-width:768px){
@@ -105,69 +116,7 @@ h1,h2,h3,h4,h5,h6{
         font-size:1.3rem
     }
 }
-    
-.social-icons{
-    position:absolute;
-    margin-bottom:2rem;
-    width:100%;z-index:2
-}
-
-.social-icons ul{
-    margin-top:2rem;
-    width:100%;
-    text-align:center
-}
-
-.social-icons ul>li{
-    margin-left:1rem;
-    margin-right:1rem;
-    display:inline-block
-}
-
-.social-icons ul>li>a{
-    display:block;
-    color:#fff;
-    background-color:rgba(0,46,102,.8);
-    border-radius:100%;
-    font-size:2rem;
-    line-height:4rem;
-    height:4rem;
-    width:4rem
-}
-
-@media (min-width:768px){
-    .social-icons{
-        margin:0;
-        position:absolute;
-        right:2.5rem;
-        bottom:2rem;
-        width:auto
-    }
-    .social-icons ul{
-        margin-top:0;
-        width:auto
-    }
-    .social-icons ul>li{
-        display:block;
-        margin-left:0;
-        margin-right:0;
-        margin-bottom:2rem
-    }
-    .social-icons ul>li:last-child{
-        margin-bottom:0
-    }
-    .social-icons ul>li>a{
-        -webkit-transition:all .2s ease-in-out;
-        transition:all .2s ease-in-out;
-        font-size:2rem;
-        line-height:4rem;
-        height:4rem;
-        width:4rem
-    }
-    .social-icons ul>li>a:hover{
-        background-color:#002e66
-    }
-}
+ 
 .btn-secondary{
     background-color:#cd9557;
     border-color:#cd9557
