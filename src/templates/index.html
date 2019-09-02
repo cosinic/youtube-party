@@ -34,15 +34,15 @@
                 <h1 class="mb-3">YouTube Party!</h1>
                 
                 <p class="mb-5">Synced <b>Youtube</b> videos to share, watch, and talk about with your friends</p>
-                <div>
-                  <input type="email" class="form-control" placeholder="Enter room name..." aria-label="Enter email..." aria-describedby="basic-addon">
-                  
-                    
-                </div>
-                <div id="button-list">
-                  <button class="btn btn-danger btn-block" type="button" style="margin:0.5rem">Make Room</button>
-                  <button class="btn btn-danger btn-block" type="button" style="margin:0.5rem">Join Room</button>
-                </div>
+                <form method="POST">
+                  <div>
+                    <input name="room_name" id="room_name" class="form-control" placeholder="Enter room name..." aria-describedby="basic-addon" required>
+                  </div>
+                  <div id="button-list">
+                    <button name="action" id="make_room" value="make" class="btn btn-danger btn-block" type="submit" style="margin:0.5rem">Make Room</button>
+                    <button name="action" value="join" class="btn btn-danger btn-block" type="submit" style="margin:0.5rem">Join Room</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -57,14 +57,6 @@
       $('document').ready(function() { 
           var socket = io.connect('http://127.0.0.1:5000');
 
-          socket.on('connect', function(){
-            socket.send('User has connected!');
-          });
-
-          socket.on("disconnect", function(){
-            socket.send("user disconnected");
-          });
-
           var options = {
           videoId: vids[Math.floor(Math.random()*vids.length)], 
           start: 76, 
@@ -72,7 +64,11 @@
           ratio: $(window).width() / $(window).height() //Ratio will be dynamic according to browser window ratio
         };  
         $('#tubular-container').tubular(options); 
+
+
       });
+
+      
     </script>
     
   </body>
