@@ -19,21 +19,30 @@ try:
 except OSError:
     pass
 
+room_list = {}
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
     if request.method == 'POST':
         room_name = request.form['room_name']
-        session['room'] = room_name
-        return redirect(url_for('room', room=room_name))
+        if(room_name not in room_list):
+            room_list[room_name] = room_name
+            session['room'] = room_name
+            return redirect(url_for('room', room=room_name))
+        else:
+            print('Room already exists')
+            return render_template('index.html')
     else:
         room_name = session.get('room', '')
         return render_template('index.html')
     
 @app.route('/<string:room>')
 def room(room):
-    session['room'] = room
-    return render_template('room.html')
+    if(room in room_list):
+        session['room'] = room
+        return render_template('room.html')
+    else:
+        return redirect(url_for('index'))
 
 
 

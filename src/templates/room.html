@@ -2,17 +2,70 @@
 <html>
   <head>
     <title>Chat Room</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
   </head>
+
   <body>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Set Display Name</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <label for="username" class="col-form-label">Display Name:</label>
+                  <input type="text" class="form-control" id="recipient-name">
+                </div>
+                
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container my-container">
+        <h1 class="my-4">YouTube Party</h1>
+        <div class="row">
+          <div class="col-md-8">
+              <div id="player"></div>
+          </div>
+
+          <!--Chat Area-->
+          <div class="col-md-4 chatArea">
+            <h3 class="my-3">Chat Box</h3>
+            <ul id="messages" class="messages" style="height: 250px; overflow: auto; background-color: lightgray;"></ul>
+            <div id="inputField" class="input-group mb-3">
+              <input id="myMessage" type="text" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
+              <div class="input-group-append">
+                <button id="sendbutton" class="btn btn-primary" type="button">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     <script type="text/javascript">
       $('document').ready(function() { 
         var socket = io.connect('http://127.0.0.1:5000');
 
         socket.on('message', function(msg){
-          $("#messages").append('<li>'+msg+'</li>');
+          $("#messages").append("<li>"+msg+"</li>");
           console.log('Received message');
         });
 
@@ -25,15 +78,64 @@
         });
 
         $('#sendbutton').on('click',function(){
-          text = $('#myMessage').val();
-          $('#myMessage').val('');
-          socket.emit('text', text);
+          if($('#myMessage').val() != ""){
+            text = $('#myMessage').val();
+            $('#myMessage').val('');
+            socket.emit('text', text);
+          }
         });
+
+        $('#myMessage').keydown(function(event){
+          if(event.keyCode == 13){
+            event.preventDefault();
+            if($('#myMessage'.val() != "")){
+              text = $('#myMessage').val();
+              socket.emit('text',text);
+              $('#myMessage').val('');
+            };
+          }
+        });
+
+        $('#exampleModal').modal('show');
       
       });
+
+      var tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '390',
+          width: '640',
+          videoId: 'M7lc1UVf-VE',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+
+      // 4. The API will call this function when the video player is ready.
+      function onPlayerReady(event) {
+        event.target.playVideo();
+      }
+
+      // 5. The API calls this function when the player's state changes.
+      //    The function indicates that when playing a video (state=1),
+      //    the player should play for six seconds and then stop.
+      var done = false;
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING && !done) {
+          setTimeout(stopVideo, 6000);
+          done = true;
+        }
+      }
+      function stopVideo() {
+        player.stopVideo();
+      }
     </script>
-    <ul id="messages"></ul>
-    <input type="text" id="myMessage">
-    <button id="sendbutton">Send</button>
   </body>
 </html>
