@@ -19,16 +19,18 @@ try:
 except OSError:
     pass
 
+#Contains list of existing rooms and their respective users
 room_list = {}
+
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
     if request.method == 'POST':
         room_name = request.form['room_name']
         if(room_name not in room_list):
-            room_list[room_name] = room_name
+            room_list[room_name] = []
             session['room'] = room_name
-            return redirect(url_for('room', room=room_name))
+            return redirect(url_for('room', room=session.get('room')))
         else:
             print('Room already exists')
             return render_template('index.html')
@@ -44,27 +46,38 @@ def room(room):
     else:
         return redirect(url_for('index'))
 
-
-
 @socketio.on('join')
 def joined():
+    session['id'] = request.sid
     room = session.get('room')
     join_room(room)
     print('User has entered : ' + room)
-    emit('status', 'User has entered ' + session.get('room'), room=room)
+    emit('userlist init', room_list[room], room=room)
+    
 
 @socketio.on('leave')
 def left():
     room = session.get('room')
+    room_list[room].remove(session.get('username'))
+    print(room_list[room])
     leave_room(room)
-    emit('status', 'User has left:' + session.get('room'), room=room)
+    emit('user left', session.get('username'), room=room)
 
 @socketio.on('text')
 def text(message):
     room = session.get('room')
     print('User has entered '+message+ ' in ' +session.get('room'))
-    emit('message', message, room=room)
-from . import events
+    emit('message', {'message':message, 'username':session.get('username')}, room=room)
+
+@socketio.on('add user')
+def adduser(username):
+    room = session.get('room')
+    session['username'] = username
+    room_list[room].append(username)
+    print(session.get('username') + ' has been added to room ' + room)
+    print(room_list[room])
+    emit('user added',username, room=room)
+
 
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')

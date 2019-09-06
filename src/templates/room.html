@@ -25,36 +25,39 @@
               <form>
                 <div class="form-group">
                   <label for="username" class="col-form-label">Display Name:</label>
-                  <input type="text" class="form-control" id="recipient-name">
+                  <input id="username" type="text" class="form-control" id="recipient-name">
                 </div>
                 
               </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Confirm</button>
+              <button id="submitusername" type="button" class="btn btn-primary">Confirm</button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="container my-container">
+      <div class="container-fluid">
         <h1 class="my-4">YouTube Party</h1>
         <div class="row">
-          <div class="col-md-8">
+          <div class="col-md-6">
               <div id="player"></div>
           </div>
 
           <!--Chat Area-->
-          <div class="col-md-4 chatArea">
+          <div class="col-md-2 chatArea">
             <h3 class="my-3">Chat Box</h3>
-            <ul id="messages" class="messages" style="height: 250px; overflow: auto; background-color: lightgray;"></ul>
+            <ul id="messages" class="messages" style="height: 250px; padding-left:10px; overflow: auto; background-color: lightgray; list-style-type:none; "></ul>
             <div id="inputField" class="input-group mb-3">
-              <input id="myMessage" type="text" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
+              <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
               <div class="input-group-append">
                 <button id="sendbutton" class="btn btn-primary" type="button">Send</button>
               </div>
             </div>
+          </div>
+          <div class="col-md-2">
+            <h3 class="my-3">Users</h3>
+            <ul id="userlist" style="height: 250px; overflow: auto; background-color: lightgray; list-style-type:none; "></ul>
           </div>
         </div>
       </div>
@@ -63,11 +66,35 @@
     <script type="text/javascript">
       $('document').ready(function() { 
         var socket = io.connect('http://127.0.0.1:5000');
+        var displayname = "";
+        var firstinit = false;
 
-        socket.on('message', function(msg){
-          $("#messages").append("<li>"+msg+"</li>");
+        socket.on('message', function(data){
+          $("#messages").append("<li>"+data.username+": "+data.message+"</li>");
+          $("#messages").scrollTop($("#messages")[0].scrollHeight);
           console.log('Received message');
         });
+
+        socket.on('userlist init', function(user_list){
+          if(firstinit == false){
+            var i;
+            var listnodupes = ArrNoDupe(user_list);
+            for(i = 0; i < listnodupes.length; i++){
+              $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
+            }
+            firstinit = true;
+          }
+        });
+
+        socket.on('user added', function(username, user_list){
+          $("#messages").append("<li>"+username+" has joined the room</li>");
+          $("#userlist").append("<li class='user'>"+username+"</li>");
+        });
+
+        socket.on('user left', function(username){
+          removeSpec(username);
+          $("#messages").append("<li>"+username+" has left the room</li>");
+        })
 
         socket.on('connect',function(){
           socket.emit('join');
@@ -81,24 +108,63 @@
           if($('#myMessage').val() != ""){
             text = $('#myMessage').val();
             $('#myMessage').val('');
-            socket.emit('text', text);
+            socket.emit('text',text);
           }
         });
 
         $('#myMessage').keydown(function(event){
           if(event.keyCode == 13){
             event.preventDefault();
-            if($('#myMessage'.val() != "")){
-              text = $('#myMessage').val();
-              socket.emit('text',text);
-              $('#myMessage').val('');
-            };
+            document.getElementById('sendbutton').click();
+          }
+        });
+
+        $('#submitusername').on('click',function(){
+          if($('#username').val() != ""){
+            name = $('#username').val();
+            socket.emit('add user', name);
+            $('#exampleModal').modal('hide');
+            displayname = name;
           }
         });
 
         $('#exampleModal').modal('show');
+
+        function ArrNoDupe(a) {
+          var temp = {};
+          for (var i = 0; i < a.length; i++)
+              temp[a[i]] = true;
+          var r = [];
+          for (var k in temp)
+              r.push(k);
+          return r;
+        }
+
+        function removeSpec(query){
+          elements = document.getElementsByClassName('user'); /* Get the li elements in the list */
+          var myList = document.getElementById("userlist"); /* Var to reference the list */
+          var length = (document.getElementsByClassName('user').length); /* # of li elements */
+          var checker = 'false'; /* boolean-ish value to determine if value was found */
+
+          for(var counter = 0; counter < length; counter ++)
+          {
+              if (elements[counter].textContent == query )
+              {
+                  myList.removeChild(myList.children[ (counter) ]);
+                  // better: myList.removeChild(elements[counter]);
+                  checker="true";
+                  break;
+              }
+          }
+          if ( checker == "false") 
+          {
+              alert("Not Found");
+            }
+        }
       
       });
+
+ 
 
       var tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
