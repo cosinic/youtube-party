@@ -12,7 +12,6 @@ app = Flask(__name__, instance_relative_config=True)
 app.config['SECRET_KEY'] = 'secret'
 socketio = SocketIO(app)
 
-
 # ensure the instance folder exists
 try:
     os.makedirs(app.instance_path)
@@ -27,13 +26,22 @@ room_list = {}
 def index():
     if request.method == 'POST':
         room_name = request.form['room_name']
-        if(room_name not in room_list):
-            room_list[room_name] = []
-            session['room'] = room_name
-            return redirect(url_for('room', room=session.get('room')))
-        else:
-            print('Room already exists')
-            return render_template('index.html')
+        #Make Room
+        if request.form['action'] == 'make':     
+            if room_name not in room_list:
+                room_list[room_name] = []
+                session['room'] = room_name
+                return redirect(url_for('room', room=session.get('room')))
+            else:
+                print('Room already exists')
+                return render_template('index.html')
+        #Join Room
+        if request.form['action'] == 'join':
+            if room_name in room_list:
+                return redirect(url_for('room', room=session.get('room')))
+            else:
+                print('Room does not exist')
+                return render_template('index.html')
     else:
         room_name = session.get('room', '')
         return render_template('index.html')
@@ -76,7 +84,25 @@ def adduser(username):
     room_list[room].append(username)
     print(session.get('username') + ' has been added to room ' + room)
     print(room_list[room])
-    emit('user added',username, room=room)
+    emit('user added', username, room=room)
+
+@socketio.on('video paused')
+def pausevideo():
+    room = session.get('room')
+    print('video has been paused')
+    emit('pause video', room=room)
+
+@socketio.on('video played')
+def playvideo():
+    room = session.get('room')
+    print('video playing')
+    emit('play video', room=room)
+
+@socketio.on('video buffering')
+def buffervideo(time):
+    room = session.get('room')
+    print('video buffering')
+    emit('buffer video', time, room=room)
 
 
 if __name__ == "__main__":

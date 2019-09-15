@@ -4,34 +4,24 @@
     <title>Chat Room</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.room.css') }}">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    
   </head>
 
   <body>
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="exampleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Set Display Name</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
             <div class="modal-body">
-              <form>
+              <form id="modalForm">
                 <div class="form-group">
                   <label for="username" class="col-form-label">Display Name:</label>
-                  <input id="username" type="text" class="form-control" id="recipient-name">
+                  <input id="username" type="text" class="form-control" required>
                 </div>
-                
+                <button id="submitusername" type="submit" class="btn btn-primary" style="float:right">Confirm</button>
               </form>
-            </div>
-            <div class="modal-footer">
-              <button id="submitusername" type="button" class="btn btn-primary">Confirm</button>
             </div>
           </div>
         </div>
@@ -62,109 +52,106 @@
         </div>
       </div>
 
-
     <script type="text/javascript">
-      $('document').ready(function() { 
-        var socket = io.connect('http://127.0.0.1:5000');
-        var displayname = "";
-        var firstinit = false;
-
-        socket.on('message', function(data){
-          $("#messages").append("<li>"+data.username+": "+data.message+"</li>");
-          $("#messages").scrollTop($("#messages")[0].scrollHeight);
-          console.log('Received message');
-        });
-
-        socket.on('userlist init', function(user_list){
-          if(firstinit == false){
-            var i;
-            var listnodupes = ArrNoDupe(user_list);
-            for(i = 0; i < listnodupes.length; i++){
-              $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
-            }
-            firstinit = true;
-          }
-        });
-
-        socket.on('user added', function(username, user_list){
-          $("#messages").append("<li>"+username+" has joined the room</li>");
-          $("#userlist").append("<li class='user'>"+username+"</li>");
-        });
-
-        socket.on('user left', function(username){
-          removeSpec(username);
-          $("#messages").append("<li>"+username+" has left the room</li>");
-        })
-
-        socket.on('connect',function(){
-          socket.emit('join');
-        });
-
-        socket.on('disconnect',function(){
-          socket.emit('leave');
-        });
-
-        $('#sendbutton').on('click',function(){
-          if($('#myMessage').val() != ""){
-            text = $('#myMessage').val();
-            $('#myMessage').val('');
-            socket.emit('text',text);
-          }
-        });
-
-        $('#myMessage').keydown(function(event){
-          if(event.keyCode == 13){
-            event.preventDefault();
-            document.getElementById('sendbutton').click();
-          }
-        });
-
-        $('#submitusername').on('click',function(){
-          if($('#username').val() != ""){
-            name = $('#username').val();
-            socket.emit('add user', name);
-            $('#exampleModal').modal('hide');
-            displayname = name;
-          }
-        });
-
-        $('#exampleModal').modal('show');
-
-        function ArrNoDupe(a) {
-          var temp = {};
-          for (var i = 0; i < a.length; i++)
-              temp[a[i]] = true;
-          var r = [];
-          for (var k in temp)
-              r.push(k);
-          return r;
-        }
-
-        function removeSpec(query){
-          elements = document.getElementsByClassName('user'); /* Get the li elements in the list */
-          var myList = document.getElementById("userlist"); /* Var to reference the list */
-          var length = (document.getElementsByClassName('user').length); /* # of li elements */
-          var checker = 'false'; /* boolean-ish value to determine if value was found */
-
-          for(var counter = 0; counter < length; counter ++)
-          {
-              if (elements[counter].textContent == query )
-              {
-                  myList.removeChild(myList.children[ (counter) ]);
-                  // better: myList.removeChild(elements[counter]);
-                  checker="true";
-                  break;
-              }
-          }
-          if ( checker == "false") 
-          {
-              alert("Not Found");
-            }
-        }
       
+      var socket = io.connect('http://127.0.0.1:5000');
+      var displayname = "";
+      var firstinit = false;
+
+      socket.on('message', function(data){
+        $("#messages").append("<li><span class='username'>"+data.username+":</span><span class='messagebody'>"+data.message+"</span></li>");
+        $("#messages").scrollTop($("#messages")[0].scrollHeight);
+        console.log('Received message');
       });
 
- 
+      socket.on('userlist init', function(user_list){
+        if(firstinit == false){
+          var i;
+          var listnodupes = ArrNoDupe(user_list);
+          for(i = 0; i < listnodupes.length; i++){
+            $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
+          }
+          firstinit = true;
+        }
+      });
+
+      socket.on('user added', function(username, user_list){
+        $("#messages").append("<li>"+username+" has joined the room</li>");
+        $("#userlist").append("<li class='user'>"+username+"</li>");
+      });
+
+      socket.on('user left', function(username){
+        removeSpec(username);
+        $("#messages").append("<li>"+username+" has left the room</li>");
+      })
+
+      socket.on('connect',function(){
+        socket.emit('join');
+      });
+
+      socket.on('disconnect',function(){
+        socket.emit('leave');
+      });
+
+
+      $('#sendbutton').on('click',function(){
+        if($('#myMessage').val() != ""){
+          text = $('#myMessage').val();
+          $('#myMessage').val('');
+          socket.emit('text',text);
+        }
+      });
+
+      $('#myMessage').keydown(function(event){
+        if(event.keyCode == 13){
+          event.preventDefault();
+          document.getElementById('sendbutton').click();
+        }
+      });
+
+      $('#exampleModal').modal('show');
+
+      $('#modalForm').submit(function(event){
+        event.preventDefault();
+        if($('#username').val() != ""){
+          name = $('#username').val();
+          socket.emit('add user', name);
+          $('#exampleModal').modal('hide');
+          displayname = name;
+        }
+      });
+
+      function ArrNoDupe(a) {
+        var temp = {};
+        for (var i = 0; i < a.length; i++)
+            temp[a[i]] = true;
+        var r = [];
+        for (var k in temp)
+            r.push(k);
+        return r;
+      }
+
+      function removeSpec(query){
+        elements = document.getElementsByClassName('user'); /* Get the li elements in the list */
+        var myList = document.getElementById("userlist"); /* Var to reference the list */
+        var length = (document.getElementsByClassName('user').length); /* # of li elements */
+        var checker = 'false'; /* boolean-ish value to determine if value was found */
+
+        for(var counter = 0; counter < length; counter ++)
+        {
+            if (elements[counter].textContent == query )
+            {
+                myList.removeChild(myList.children[ (counter) ]);
+                // better: myList.removeChild(elements[counter]);
+                checker="true";
+                break;
+            }
+        }
+        if ( checker == "false") 
+        {
+            alert("Not Found");
+          }
+      }
 
       var tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
@@ -192,16 +179,42 @@
       // 5. The API calls this function when the player's state changes.
       //    The function indicates that when playing a video (state=1),
       //    the player should play for six seconds and then stop.
-      var done = false;
+      var lastEventTime = new Date();
+      var lastBufferingTime = new Date();
+      var expectedEvent;
       function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING && !done) {
-          setTimeout(stopVideo, 6000);
-          done = true;
+        
+        switch(event.data){
+          case YT.PlayerState.PAUSED:
+            socket.emit('video paused');
+            lastEventTime = new Date();
+            break;
+          case YT.PlayerState.PLAYING:
+            socket.emit('video played');
+            lastEventTime = new Date();
+            break;
+          case YT.PlayerState.BUFFERING:
+            socket.emit('video buffering', player.getCurrentTime());
+            break;
         }
+        
       }
       function stopVideo() {
         player.stopVideo();
       }
+
+      socket.on('play video', function(){
+        player.playVideo();
+      });
+
+      socket.on('pause video', function() {
+        player.pauseVideo();
+      });
+
+      socket.on('buffer video', function(time) {
+        player.seekTo(time);
+      });
+
     </script>
   </body>
 </html>
