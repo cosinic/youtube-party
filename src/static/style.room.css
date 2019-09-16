@@ -1,3 +1,27 @@
+html{
+    height:100;
+}
+
+body{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height:100%;
+    width: 100%;
+    min-height:35rem;
+    font-family: "Roboto Condensed",sans-serif;
+    font-weight:300
+}
+
+#overlay{
+    position:absolute;
+    top:0;
+    left:0;
+    height:100%;
+    width:100%;
+    background-color: #2e2e2e;
+}
+
 .grid-container{
     display: grid;
     grid-template-columns: 20% auto 20%;
@@ -17,9 +41,14 @@
 
 #header-container h1{
     margin-left: 10px;
-    margin-top: 20px;
-    font-family: "Roboto Condensed",sans-serif;
+    padding-top: 20px;
     font-weight:700;
+}
+
+
+#header-container a{
+    color: #ffffff;
+    text-decoration: none;
 }
 
 #queue-container{
@@ -33,7 +62,7 @@
 }
 
 .grid-container .chat-container{
-    background-color: rgba(225, 225, 225, 0.8);
+    background-color: #e9ecef;
     border-radius: 0.3rem;
 }
 

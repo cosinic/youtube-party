@@ -22,61 +22,67 @@
                   <label for="username" class="col-form-label">Display Name:</label>
                   <input id="username" type="text" class="form-control" required>
                 </div>
-                <button id="submitusername" type="submit" class="btn btn-primary" style="float:right">Confirm</button>
+                <button id="submitusername" type="submit" class="btn btn-danger" style="float:right">Confirm</button>
               </form>
             </div>
           </div>
         </div>
       </div>
-
-      <div id="header-container">
-        <div id="headerBar">
-          <span id="logo">
-            <h1 style="font-size:300%">
-              YouTube Party
-            </h1>
-          </span>
-        </div>
-      </div>
-
-      <div class="grid-container"> 
-        <!--Action Hub-->
-        <div id="action-hub">
-          <div id="queue-container">
-            <h3>
-              Queue a video
-            </h3>
-            <input type="text" class="form-control" id="video-url" placeholder="Enter Youtube video URL">
-            <button id="btn-url-submit" class="btn btn-primary">
-              Submit
-            </button>
-          </div>
-          <div id="userlist-container">
-            <h3 class="my-3">Users</h3>
-            <ul id="userlist"></ul>
-          </div>
-        </div>
-
-        <!--Youtube Player-->
-        <div id="player-container">
-          <div id="player"></div>
-        </div>
-
-        <!--Chat Area-->
-        <div class="chat-container">
-          <div id="chat-header">
-            <b>Chat</b>
-          </div>
-          <ul id="messages" class="messages"></ul>
-          <div id="inputField" class="input-group">
-            <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
-            <div class="input-group-append">
-              <button id="sendbutton" class="btn btn-primary" type="button">Send</button>
+      <div id="overlay">
+        
+        <div id="header-container">
+            <div id="headerBar">
+              <span id="logo">
+                <h1 style="font-size:300%">
+                  <a href="{{ url_for('index') }}">
+                      YouTube Party
+                  </a>
+                </h1>
+              </span>
             </div>
           </div>
+    
+          <div class="grid-container"> 
+            <!--Action Hub-->
+            <div id="action-hub">
+              <div id="queue-container">
+                <h3>
+                  Queue a video
+                </h3>
+                <form>
+                  <input type="text" class="form-control" id="video-url" placeholder="Enter Youtube video URL" required>
+                  <button id="btn-url-submit" class="btn btn-danger" type="submit">
+                    Submit
+                  </button>
+                </form>
+              </div>
+              <div id="userlist-container">
+                <h3 class="my-3">Users</h3>
+                <ul id="userlist"></ul>
+              </div>
+            </div>
+    
+            <!--Youtube Player-->
+            <div id="player-container">
+              <div id="player"></div>
+            </div>
+    
+            <!--Chat Area-->
+            <div class="chat-container">
+              <div id="chat-header">
+                <b>Chat</b>
+              </div>
+              <ul id="messages" class="messages"></ul>
+              <div id="inputField" class="input-group">
+                <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                  <button id="sendbutton" class="btn btn-danger" type="button">Send</button>
+                </div>
+              </div>
+            </div>
+            
         </div>
       </div>
-
     <script type="text/javascript">
       
       var socket = io.connect('http://127.0.0.1:5000');
