@@ -60,9 +60,8 @@ def joined():
     room = session.get('room')
     join_room(room)
     print('User has entered : ' + room)
-    emit('userlist init', room_list[room], room=room)
+    emit('user init', room_list[room], room=room)
     
-
 @socketio.on('leave')
 def left():
     room = session.get('room')
@@ -103,6 +102,7 @@ def buffervideo(time):
     room = session.get('room')
     print('video buffering')
     emit('buffer video', time, room=room)
+
 
 
 if __name__ == "__main__":

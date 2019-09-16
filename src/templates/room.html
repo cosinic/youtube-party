@@ -1,10 +1,12 @@
 <!doctype html>
 <html>
   <head>
-    <title>Chat Room</title>
+    <title>Youtube Party - Watch with your friends</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.room.css') }}">
+    <!--<link rel="stylesheet" href="../static/style.room.css">-->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -27,27 +29,50 @@
         </div>
       </div>
 
-      <div class="container-fluid">
-        <h1 class="my-4">YouTube Party</h1>
-        <div class="row">
-          <div class="col-md-6">
-              <div id="player"></div>
-          </div>
+      <div id="header-container">
+        <div id="headerBar">
+          <span id="logo">
+            <h1 style="font-size:300%">
+              YouTube Party
+            </h1>
+          </span>
+        </div>
+      </div>
 
-          <!--Chat Area-->
-          <div class="col-md-2 chatArea">
-            <h3 class="my-3">Chat Box</h3>
-            <ul id="messages" class="messages" style="height: 250px; padding-left:10px; overflow: auto; background-color: lightgray; list-style-type:none; "></ul>
-            <div id="inputField" class="input-group mb-3">
-              <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
-              <div class="input-group-append">
-                <button id="sendbutton" class="btn btn-primary" type="button">Send</button>
-              </div>
-            </div>
+      <div class="grid-container"> 
+        <!--Action Hub-->
+        <div id="action-hub">
+          <div id="queue-container">
+            <h3>
+              Queue a video
+            </h3>
+            <input type="text" class="form-control" id="video-url" placeholder="Enter Youtube video URL">
+            <button id="btn-url-submit" class="btn btn-primary">
+              Submit
+            </button>
           </div>
-          <div class="col-md-2">
+          <div id="userlist-container">
             <h3 class="my-3">Users</h3>
-            <ul id="userlist" style="height: 250px; overflow: auto; background-color: lightgray; list-style-type:none; "></ul>
+            <ul id="userlist"></ul>
+          </div>
+        </div>
+
+        <!--Youtube Player-->
+        <div id="player-container">
+          <div id="player"></div>
+        </div>
+
+        <!--Chat Area-->
+        <div class="chat-container">
+          <div id="chat-header">
+            <b>Chat</b>
+          </div>
+          <ul id="messages" class="messages"></ul>
+          <div id="inputField" class="input-group">
+            <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
+            <div class="input-group-append">
+              <button id="sendbutton" class="btn btn-primary" type="button">Send</button>
+            </div>
           </div>
         </div>
       </div>
@@ -57,17 +82,18 @@
       var socket = io.connect('http://127.0.0.1:5000');
       var displayname = "";
       var firstinit = false;
+      var users;
 
       socket.on('message', function(data){
-        $("#messages").append("<li><span class='username'>"+data.username+":</span><span class='messagebody'>"+data.message+"</span></li>");
+        $("#messages").append("<li><span class='username'>"+data.username+": </span><span class='messagebody'>"+data.message+"</span></li>");
         $("#messages").scrollTop($("#messages")[0].scrollHeight);
         console.log('Received message');
       });
 
-      socket.on('userlist init', function(user_list){
+      socket.on('user init', function(user_list){
         if(firstinit == false){
           var i;
-          var listnodupes = ArrNoDupe(user_list);
+          var listnodupes = ArrNoDupe(user_list);   
           for(i = 0; i < listnodupes.length; i++){
             $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
           }
@@ -92,6 +118,7 @@
       socket.on('disconnect',function(){
         socket.emit('leave');
       });
+
 
 
       $('#sendbutton').on('click',function(){
@@ -159,10 +186,11 @@
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
       var player;
+
       function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
-          height: '390',
-          width: '640',
+          height: $('#player-container').height(),
+          width: $('#player-container').width(),
           videoId: 'M7lc1UVf-VE',
           events: {
             'onReady': onPlayerReady,
@@ -182,8 +210,7 @@
       var lastEventTime = new Date();
       var lastBufferingTime = new Date();
       var expectedEvent;
-      function onPlayerStateChange(event) {
-        
+      function onPlayerStateChange(event) {  
         switch(event.data){
           case YT.PlayerState.PAUSED:
             socket.emit('video paused');
@@ -197,10 +224,6 @@
             socket.emit('video buffering', player.getCurrentTime());
             break;
         }
-        
-      }
-      function stopVideo() {
-        player.stopVideo();
       }
 
       socket.on('play video', function(){
@@ -213,6 +236,7 @@
 
       socket.on('buffer video', function(time) {
         player.seekTo(time);
+        player.playVideo();
       });
 
     </script>
