@@ -66,6 +66,7 @@ def joined():
 def left():
     room = session.get('room')
     room_list[room].remove(session.get('username'))
+    print('User has left')
     print(room_list[room])
     leave_room(room)
     emit('user left', session.get('username'), room=room)

@@ -13,7 +13,7 @@
   </head>
 
   <body>
-    <div class="modal fade" id="exampleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="exampleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-body">
@@ -31,55 +31,60 @@
       <div id="overlay">
         
         <div id="header-container">
-            <div id="headerBar">
-              <span id="logo">
-                <h1 style="font-size:300%">
-                  <a href="{{ url_for('index') }}">
-                      YouTube Party
-                  </a>
-                </h1>
-              </span>
+          <div id="headerBar">
+            <span id="logo">
+              <h2 style="font-size:250%">
+                <a href="{{ url_for('index') }}">
+                    YouTube Party
+                </a>
+              </h2>
+              <a href="{{ url_for('index') }}" onclick="leave()" id="leaveroom">Leave Room</a>
+            </span>
+          </div>
+        </div>
+  
+        <div class="grid-container"> 
+          <!--Action Hub-->
+          <div id="action-hub">
+            <div id="queue-container">
+              <h3>
+                Queue a video
+              </h3>
+              <form>
+                <input type="text" class="form-control" id="video-url" placeholder="Enter Youtube video URL" required>
+                <button id="btn-url-submit" class="btn btn-danger" type="submit">
+                  Submit
+                </button>
+              </form>
+            </div>
+            <div id="userlist-container">
+              <h3 id="UsersHeader">Users</h3>
+              <ul id="userlist"></ul>
+            </div>
+            <div id="voteskip-container">
+              <button id="btn-voteskip" class="btn btn-danger">Vote Skip</button>
+              <b>Votes: </b>
             </div>
           </div>
-    
-          <div class="grid-container"> 
-            <!--Action Hub-->
-            <div id="action-hub">
-              <div id="queue-container">
-                <h3>
-                  Queue a video
-                </h3>
-                <form>
-                  <input type="text" class="form-control" id="video-url" placeholder="Enter Youtube video URL" required>
-                  <button id="btn-url-submit" class="btn btn-danger" type="submit">
-                    Submit
-                  </button>
-                </form>
-              </div>
-              <div id="userlist-container">
-                <h3 class="my-3">Users</h3>
-                <ul id="userlist"></ul>
+  
+          <!--Youtube Player-->
+          <div id="player-container">
+            <div id="player"></div>
+            <div id="temp">
+
+            </div>
+          </div>
+  
+          <!--Chat Area-->
+          <div class="chat-container">
+            <ul id="messages" class="messages"></ul>
+            <div id="inputField" class="input-group">
+              <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
+              <div class="input-group-append">
+                <button id="sendbutton" class="btn btn-danger" type="button">Send</button>
               </div>
             </div>
-    
-            <!--Youtube Player-->
-            <div id="player-container">
-              <div id="player"></div>
-            </div>
-    
-            <!--Chat Area-->
-            <div class="chat-container">
-              <div id="chat-header">
-                <b>Chat</b>
-              </div>
-              <ul id="messages" class="messages"></ul>
-              <div id="inputField" class="input-group">
-                <input id="myMessage" class="form-control" aria-label="myMessage" aria-describedby="basic-addon2">
-                <div class="input-group-append">
-                  <button id="sendbutton" class="btn btn-danger" type="button">Send</button>
-                </div>
-              </div>
-            </div>
+          </div>
             
         </div>
       </div>
@@ -91,7 +96,7 @@
       var users;
 
       socket.on('message', function(data){
-        $("#messages").append("<li><span class='username'>"+data.username+": </span><span class='messagebody'>"+data.message+"</span></li>");
+        $("#messages").append("<li><span class='username' style='color: #dc3545;'><b>"+data.username+"</b>: </span><span class='messagebody'>"+data.message+"</span></li>");
         $("#messages").scrollTop($("#messages")[0].scrollHeight);
         console.log('Received message');
       });
@@ -101,20 +106,20 @@
           var i;
           var listnodupes = ArrNoDupe(user_list);   
           for(i = 0; i < listnodupes.length; i++){
-            $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
+            $("#userlist").append("<li class='user'><h3><small>"+listnodupes[i]+"</small></h3></li>");
           }
           firstinit = true;
         }
       });
 
       socket.on('user added', function(username, user_list){
-        $("#messages").append("<li>"+username+" has joined the room</li>");
-        $("#userlist").append("<li class='user'>"+username+"</li>");
+        $("#messages").append("<li style='text-align:center;'><b>"+username+" joined the room</b></li>");
+        $("#userlist").append("<li class='user'><h3><small>"+username+"</small></h3></li>");
       });
 
       socket.on('user left', function(username){
         removeSpec(username);
-        $("#messages").append("<li>"+username+" has left the room</li>");
+        $("#messages").append("<li style='text-align:center;'>"+username+" left the room</li>");
       })
 
       socket.on('connect',function(){
@@ -153,6 +158,10 @@
           displayname = name;
         }
       });
+
+      function leave(){
+        socket.emit('leave');
+      }
 
       function ArrNoDupe(a) {
         var temp = {};
