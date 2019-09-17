@@ -48,17 +48,18 @@
               <h3>
                 Queue a video
               </h3>
-              <form>
+              <form id="queue-form">
                 <input type="text" class="form-control" id="video-url" placeholder="Enter Youtube video URL" required>
                 <button id="btn-url-submit" class="btn btn-danger" type="submit">
                   Submit
                 </button>
               </form>
             </div>
-            <div id="userlist-container">
-              <h3 id="UsersHeader">Users</h3>
-              <ul id="userlist"></ul>
+
+            <div id="playlist">
+
             </div>
+            
             <div id="voteskip-container">
               <button id="btn-voteskip" class="btn btn-danger">Vote Skip</button>
               <b>Votes: </b>
@@ -68,8 +69,11 @@
           <!--Youtube Player-->
           <div id="player-container">
             <div id="player"></div>
-            <div id="temp">
-
+            <div id="info-container">
+              <div id="userlist-container">
+                <h3 id="UsersHeader">Users</h3>
+                <ul id="userlist"></ul>
+              </div>
             </div>
           </div>
   
@@ -157,6 +161,8 @@
         }
       });
 
+      
+
       function leave(){
         socket.emit('leave');
       }
@@ -204,7 +210,7 @@
         player = new YT.Player('player', {
           height: $('#player-container').height(),
           width: $('#player-container').width(),
-          videoId: 'M7lc1UVf-VE',
+          videoId: 'oIQIDpHdyW0',
           events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
@@ -236,6 +242,19 @@
           case YT.PlayerState.BUFFERING:
             socket.emit('video buffering', player.getCurrentTime());
             break;
+        }
+      }
+
+      $('#queue-form').submit(function(event){
+        event.preventDefault();
+        var url = $('#video-url').val().split('v=')[1];
+        player.loadVideoById(url);
+        $('#video-url').val('');
+      });
+
+      function onPlayerReady(event){
+        if(player.getVideoUrl() == 'https://www.youtube.com/watch' && [].length > 0){
+          player.cueVideoById([][0].link.split('v=')[1]);
         }
       }
 

@@ -90,6 +90,11 @@ html, body{
     text-align: center;
 }
 
+#playlist{
+    background-color: lightgray;
+    height: 70%;
+}
+
 .grid-container .player-container{
     background-color: rgba(225, 225, 225, 0.8);
 }
@@ -109,7 +114,7 @@ html, body{
     width: 100%;
 }
 
-#temp{
+#info-container{
     height: 19%;
     background-color: #e9ecef;
     border-radius: .3rem;
@@ -121,8 +126,8 @@ html, body{
 }
 
 #userlist-container{
-    height: 60%;
-    margin-top: 30px;
+    height: 50%;
+    padding-top: 10px;
 }
 
 #UsersHeader{
@@ -140,6 +145,11 @@ html, body{
     background-color: lightgray;
     margin-bottom: 0;
     list-style-type:none;
+}
+
+#userlist li{
+    float: left;
+    padding:10px;
 }
 
 #voteskip-container{
