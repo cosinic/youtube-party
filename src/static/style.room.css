@@ -35,6 +35,7 @@ html, body{
     padding-top: 0px;
     height: 95%;
     margin: 0;
+    z-index: 999;
 }
 
 #action-hub{
@@ -50,7 +51,7 @@ html, body{
 
 #header-container {
     
-    height: 5%;
+    height: 50px;
     font-weight:700;
 }
 
@@ -64,6 +65,7 @@ html, body{
     position: absolute;
     left: 0;
     height: 100%;
+    width: 100%;
     margin-left: 10px;
     font-weight:700;
 }
@@ -133,7 +135,7 @@ html, body{
 
 #userlist{
     height: 85%;
-    overflow-y: scroll; 
+    overflow: auto; 
     overflow-x: hidden;
     background-color: lightgray;
     margin-bottom: 0;
@@ -158,7 +160,7 @@ html, body{
     padding: 10px;
     width: 100%;
     height: 90%;
-    overflow-y: scroll; 
+    overflow: auto; 
     overflow-x: hidden;
     list-style-type:none;
 }
