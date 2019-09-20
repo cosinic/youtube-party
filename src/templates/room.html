@@ -37,7 +37,11 @@
                   YouTube Party
               </a>
             </h2>
-            <a href="{{ url_for('index') }}" onclick="leave()" id="leaveroom">Leave Room</a>
+            <a href="{{ url_for('index') }}" onclick="leave()" id="leaveroom">
+              <button type="button" class="btn btn-outline-light"> 
+                Leave Room
+              </button>
+            </a>
           </div>
         </div>
   
@@ -61,8 +65,10 @@
             </div>
             
             <div id="voteskip-container">
-              <button id="btn-voteskip" class="btn btn-danger">Vote Skip</button>
+              <button id="btn-voteskip" class="btn btn-danger" onclick="vote()">Vote Skip</button>
               <b>Votes: </b>
+              <b id="votes">0</b>
+              <b id="votes_required"></b>
             </div>
           </div>
   
@@ -96,17 +102,29 @@
       var displayname = "";
       var firstinit = false;
       var users;
+      var queue;
+      var curr_vid;
+      var votes;
+      
 
       socket.on('message', function(data){
         $("#messages").append("<li><span class='username' style='color: #dc3545;'><b>"+data.username+"</b>: </span><span class='messagebody'>"+data.message+"</span></li>");
         $("#messages").scrollTop($("#messages")[0].scrollHeight);
-        console.log('Received message');
       });
 
-      socket.on('user init', function(user_list){
+      socket.on('user init', function(data){
         if(firstinit == false){
+          //Initialize variables to match server's
+          votes = data["Votes"];
+          curr_vid = data["Curr_Vid"];
+          queue = data["Queue"];
+          users = data["Users"]
+
+          if(curr_vid == "")
+            document.getElementById("btn-voteskip").disabled = true;
+
           var i;
-          var listnodupes = ArrNoDupe(user_list);   
+          var listnodupes = ArrNoDupe(data["Users"]);   
           for(i = 0; i < listnodupes.length; i++){
             $("#userlist").append("<li class='user'><h3><small>"+listnodupes[i]+"</small></h3></li>");
           }
@@ -117,6 +135,7 @@
       socket.on('user added', function(username, user_list){
         $("#messages").append("<li style='text-align:center;'><b>"+username+" joined the room</b></li>");
         $("#userlist").append("<li class='user'><h3><small>"+username+"</small></h3></li>");
+        document.getElementById("votes").innerHTML = votes;
       });
 
       socket.on('user left', function(username){
@@ -130,6 +149,22 @@
 
       socket.on('disconnect',function(){
         socket.emit('leave');
+      });
+
+      socket.on('update users',function(data){
+        users = data;
+        document.getElementById("votes_required").innerHTML = "/ " + Math.ceil(((users.length)/2));
+      });
+
+      socket.on('update votes',function(data){
+        votes = data;
+        document.getElementById("votes").innerHTML = votes;
+        console.log(votes);
+        console.log(Math.ceil(users.length/2));
+        if( votes == Math.ceil(users.length/2) ){
+          console.log("next video");
+          socket.emit('nextvideo');
+        }
       });
 
 
@@ -161,7 +196,10 @@
         }
       });
 
-      
+      function vote(){
+        socket.emit('vote');
+        document.getElementById("btn-voteskip").disabled = true;
+      };
 
       function leave(){
         socket.emit('leave');
@@ -210,7 +248,6 @@
         player = new YT.Player('player', {
           height: $('#player-container').height(),
           width: $('#player-container').width(),
-          videoId: 'oIQIDpHdyW0',
           events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
@@ -242,14 +279,28 @@
           case YT.PlayerState.BUFFERING:
             socket.emit('video buffering', player.getCurrentTime());
             break;
+          case YT.PlayerState.ENDED:
+            if(queue.length > 0){
+              socket.emit('nextvideo');
+            }
+            else
+              socket.emit('update curr vid',"");
+              document.getElementById("btn-voteskip").disabled = true;
         }
       }
 
       $('#queue-form').submit(function(event){
         event.preventDefault();
         var url = $('#video-url').val().split('v=')[1];
-        player.loadVideoById(url);
         $('#video-url').val('');
+        //If no video is currently playing
+        if(curr_vid == ""){
+          socket.emit('load video', url);
+          socket.emit('update curr vid',url);
+        }
+        else{
+          socket.emit("queue video", url);
+        }
       });
 
       function onPlayerReady(event){
@@ -269,6 +320,24 @@
       socket.on('buffer video', function(time) {
         player.seekTo(time);
         player.playVideo();
+      });
+
+      socket.on('update queue', function(playlist) {
+        queue = playlist;
+      });
+
+      socket.on('load next video', function(id){
+        player.loadVideoById(id);
+        document.getElementById("btn-voteskip").disabled = false;
+      });
+
+      socket.on('update curr vid client', function(url){
+        curr_vid = url;
+      });
+
+      socket.on('load new video', function(url){
+        player.loadVideoById(url);
+        document.getElementById("btn-voteskip").disabled = false;
       });
 
     </script>

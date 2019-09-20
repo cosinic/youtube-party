@@ -1,4 +1,5 @@
 import os
+import json
 from flask import (
     Flask, session, Blueprint, flash, g, redirect, render_template, request, url_for
 )
@@ -19,6 +20,7 @@ except OSError:
     pass
 
 #Contains list of existing rooms and their respective users
+# 'room' contains 
 room_list = {}
 
 
@@ -29,7 +31,7 @@ def index():
         #Make Room
         if request.form['action'] == 'make':     
             if room_name not in room_list:
-                room_list[room_name] = []
+                room_list[room_name] = { "Users": [], "Curr_Vid": "", "Queue": [], "Votes": 0}
                 session['room'] = room_name
                 return redirect(url_for('room', room=session.get('room')))
             else:
@@ -60,16 +62,19 @@ def joined():
     room = session.get('room')
     join_room(room)
     print('User has entered : ' + room)
+    print(room_list[room])
     emit('user init', room_list[room], room=room)
+    
     
 @socketio.on('leave')
 def left():
     room = session.get('room')
-    room_list[room].remove(session.get('username'))
+    room_list[room]["Users"].remove(session.get('username'))
     print('User has left')
-    print(room_list[room])
+    print(room_list[room]["Users"])
     leave_room(room)
     emit('user left', session.get('username'), room=room)
+    emit('update users', room_list[room]["Users"], room=room)
 
 @socketio.on('text')
 def text(message):
@@ -81,10 +86,11 @@ def text(message):
 def adduser(username):
     room = session.get('room')
     session['username'] = username
-    room_list[room].append(username)
+    room_list[room]["Users"].append(username)
     print(session.get('username') + ' has been added to room ' + room)
     print(room_list[room])
     emit('user added', username, room=room)
+    emit('update users', room_list[room]["Users"], room=room)
 
 @socketio.on('video paused')
 def pausevideo():
@@ -104,7 +110,44 @@ def buffervideo(time):
     print('video buffering')
     emit('buffer video', time, room=room)
 
+@socketio.on('queue video')
+def queuevideo(url):
+    room = session.get('room')
+    room_list[room]["Queue"].append(url)
+    print(room_list[room])
+    emit('update queue', room_list[room]["Queue"], room=room)
 
+@socketio.on('nextvideo')
+def nextvideo():
+    room = session.get('room')
+    if len(room_list[room]["Queue"]) > 0:
+        next_vid = room_list[room]["Queue"][0]
+        del room_list[room]["Queue"][0]
+        room_list[room]["Votes"] = 0
+        print(room_list[room])
+        emit('load next video', next_vid, room=room)
+        emit('update curr vid client', next_vid, room=room)
+        emit('update queue', room_list[room]["Queue"], room=room)
+        emit('update votes', room_list[room]["Votes"], room=room)
+
+@socketio.on('update curr vid')
+def updateCurrVid(url):
+    room = session.get('room')
+    room_list[room]["Curr_Vid"] = url
+    print(room_list[room])
+    emit('update curr vid client', url, room=room)
+
+@socketio.on('load video')
+def loadvideo(url):
+    room = session.get('room')
+    emit('load new video', url, room=room)
+
+@socketio.on('vote')
+def vote():
+    room = session.get('room')
+    room_list[room]["Votes"] += 1
+    print(room_list[room])
+    emit('update votes', room_list[room]["Votes"], room=room)
 
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')
