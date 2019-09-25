@@ -126,6 +126,7 @@ html, body{
     font-weight: bold;
 }
 
+
 .video-info{
     display: grid;
     grid-template-columns: 30% 70%;

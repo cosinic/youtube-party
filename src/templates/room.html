@@ -304,20 +304,39 @@
 
       $('#queue-form').submit(function(event){
         event.preventDefault();
-        var url = $('#video-url').val().split('v=')[1];
-        $('#video-url').val('');
-        //If no video is currently playing
-        if(curr_vid == ""){
-          socket.emit('load video', url);
-          socket.emit('update curr vid',url);
+        var re = /youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?/;
+        if(re.exec($('#video-url').val())){
+          var url = $('#video-url').val().split('v=')[1];
+          $('#video-url').val('');
+          //If no video is currently playing
+          if(curr_vid == ""){
+            socket.emit('load video', url);
+            socket.emit('update curr vid',url);
+          }
+          else{
+            socket.emit("queue video", url);
+            
+            //getVideoInfo(url);
+          }
         }
         else{
-          socket.emit("queue video", url);
-          
-          //getVideoInfo(url);
+          console.log('Invalid video url');
+          $('#video-url').val('');
         }
       });
 
+      /*
+      var queuesubmit = document.getElementById("btn-url-submit");
+      var re = /youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?/;
+      queuesubmit.addEventListener("submit", function(event){
+        if(!re.exec($('#video-url').val())){
+          document.getElementById('video-url').setCustomValidity("Invalid URL");
+        }
+        else{
+          document.getElementById('video-url').setCustomValidity("");
+        }
+      });
+      */
       function onPlayerReady(event){
         if(player.getVideoUrl() == 'https://www.youtube.com/watch' && [].length > 0){
           player.cueVideoById([][0].link.split('v=')[1]);
