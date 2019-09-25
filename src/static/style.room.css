@@ -126,7 +126,6 @@ html, body{
     font-weight: bold;
 }
 
-
 .video-info{
     display: grid;
     grid-template-columns: 30% 70%;
@@ -176,31 +175,52 @@ html, body{
 }
 
 #userlist-container{
-    height: 50%;
+    height: 100%;
     padding-top: 10px;
 }
 
-#UsersHeader{
-    text-align: center;
+#video-info-container{
+    height: 60%;
 }
 
-#userlist-container h3{
+#video-info{
+    height: 100%;
+    list-style-type: none;
+}
+
+#video-info h5{
+    margin: 0;
+}
+
+#UsersHeader{
+    text-align: left;
+    padding-inline-start: 40px;
+    color: #dc3545;
+}
+
+#userlist-container h4{
     height: auto;
 }
 
+#userlist-container a{
+    text-decoration: none;
+    color: #212529;
+}
+
 #userlist{
-    height: 85%;
+    height: 75%;
     overflow: auto; 
     overflow-x: hidden;
-    background-color: lightgray;
     margin-bottom: 0;
     list-style-type:none;
 }
 
 #userlist li{
     float: left;
-    padding:10px;
+    padding-left: 7px;
+    padding-right: 7px;
 }
+
 
 #voteskip-container{
     margin-top: 15px;

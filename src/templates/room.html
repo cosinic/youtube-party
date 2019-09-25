@@ -77,8 +77,13 @@
             <div id="player"></div>
             <div id="info-container">
               <div id="userlist-container">
-                <h3 id="UsersHeader">Users</h3>
-                <ul id="userlist"></ul>
+                <div id="video-info-container">
+                  <ul id="video-info"></ul>
+                </div>
+                <div>
+                  <h5 id="UsersHeader">Users: </h5>
+                  <ul id="userlist"></ul>
+                </div>
               </div>
             </div>
           </div>
@@ -157,7 +162,7 @@
           var listnodupes = ArrNoDupe(data["Users"]);   
 
           for(i = 0; i < listnodupes.length; i++){
-            $("#userlist").append("<li class='user'><h3><small>"+listnodupes[i]+"</small></h3></li>");
+            $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
           }
 
           
@@ -167,10 +172,12 @@
 
       socket.on('user added', function(username){
         $("#messages").append("<li style='text-align:center;'><b>"+username+" joined the room</b></li>");
-        $("#userlist").append("<li class='user'><h3><small>"+username+"</small></h3></li>");
+        $("#userlist").append("<li class='user'>"+username+"</li>");
         document.getElementById("votes").innerHTML = votes;
-        if(curr_vid != '')
+        if(curr_vid != ''){
           player.loadVideoById(curr_vid);
+          updateVideoInfo(curr_vid);
+        }
       });
 
       socket.on('user left', function(username){
@@ -372,6 +379,7 @@
       socket.on('load next video', function(id){
         player.loadVideoById(id);
         document.getElementById("btn-voteskip").disabled = false;
+        updateVideoInfo(id);
       });
 
       socket.on('update curr vid client', function(url){
@@ -381,6 +389,7 @@
       socket.on('load new video', function(url){
         player.loadVideoById(url);
         document.getElementById("btn-voteskip").disabled = false;
+        updateVideoInfo(url);
       });
 
       socket.on('load playlist', function(playlist){
@@ -393,6 +402,29 @@
           firstplaylistinit = true;
         } 
       });
+
+      function updateVideoInfo(id){
+        return gapi.client.youtube.videos.list({
+          "part": "snippet",
+          "id": id
+        })
+            .then(function(response) {
+                    // Handle the results here (response.result has the parsed body).
+                    var result = response.result;
+                    var title = result.items[0].snippet.localized.title;
+                    var author = result.items[0].snippet.channelTitle;
+                    var authorId = result.items[0].snippet.channelId;
+                    var url = "https://www.youtube.com/watch?v=" + id;
+                    var channelurl = "https://www.youtube.com/channel/" + authorId;
+                    //<li><img src="//img.youtube.com/vi/'+id+'/0.jpg" class="thumbnail"><p>'+result.items[0].snippet.localized.title+'</p></li>
+                    //'+result.items[0].snippet.localized.title+'
+                    $("#video-info").empty();
+                    $("#video-info").append('<li><a href="'+url+'"><h4>'+title+'</h4></a></li>');
+                    $("#video-info").append('<li><b>By: </b><a href="'+channelurl+'">'+author+'</a></li>');
+                    console.log("Response", response);
+                  },
+                  function(err) { console.error("Execute error", err); });
+      }
 
       function getVideoInfo(id) {
         return gapi.client.youtube.videos.list({
