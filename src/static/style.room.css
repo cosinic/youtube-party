@@ -86,14 +86,62 @@ html, body{
 }
 
 #queue-container{
-    height: 20%;
+    height: 80%;
     width: 100%;
     text-align: center;
 }
 
+#playlist-container{
+    height: 60%;
+}
+
 #playlist{
     background-color: lightgray;
-    height: 70%;
+    height: 80%;
+    overflow: auto;
+    padding: 0;
+    padding-left: 18px;
+}
+
+.playlist-title{
+    text-align: left;
+}
+
+#playlist a{
+    text-decoration: none;
+    color: #212529;
+}
+
+#playlist li{
+    padding-top: 8px;
+}
+
+#playlist li span{
+    display: inline;
+    text-overflow: ellipsis;
+    text-align: start;
+    margin: 0;
+    overflow:hidden; 
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.video-info{
+    display: grid;
+    grid-template-columns: 30% 70%;
+    grid-template-rows: 100%;
+    grid-gap: 10px;
+}
+
+.author{
+    text-align: start;
+}
+
+.thumbnail{
+    float: left;
+    margin: 0 15px 0 0;
+    height: 60px;
+    width: 100%;
 }
 
 .grid-container .player-container{
@@ -154,8 +202,8 @@ html, body{
 }
 
 #voteskip-container{
-    margin-top: 10px;
-    height: 20%;
+    margin-top: 15px;
+    height: 13%;
 }
 
 #btn-voteskip{

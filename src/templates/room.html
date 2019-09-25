@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='style.room.css') }}">
     <!--<link rel="stylesheet" href="../static/style.room.css">-->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -58,10 +59,9 @@
                   Submit
                 </button>
               </form>
-            </div>
+              <ol id="playlist">
 
-            <div id="playlist">
-
+              </ol>
             </div>
             
             <div id="voteskip-container">
@@ -96,16 +96,46 @@
             
         </div>
       </div>
+
+    
     <script type="text/javascript">
       
       var socket = io.connect('http://127.0.0.1:5000');
       var displayname = "";
       var firstinit = false;
+      var firstplaylistinit = false;
       var users;
       var queue;
       var curr_vid;
       var votes;
-      
+      var ytinit = false;
+
+      var tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var player;
+
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: $('#player-container').height(),
+          width: $('#player-container').width(),
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+        console.log('Youtube Player Ready');
+      }
+
+      function init(){
+        gapi.client.setApiKey("AIzaSyBJ4Uk1LMDbRiDwWP_pxK0B_v5ukiXuVkE");
+        gapi.client.load("youtube", "v3", function(){
+          // yt api is ready
+          console.log('Youtube API is ready');
+        });
+      }
 
       socket.on('message', function(data){
         $("#messages").append("<li><span class='username' style='color: #dc3545;'><b>"+data.username+"</b>: </span><span class='messagebody'>"+data.message+"</span></li>");
@@ -113,7 +143,7 @@
       });
 
       socket.on('user init', function(data){
-        if(firstinit == false){
+        if(!firstinit){
           //Initialize variables to match server's
           votes = data["Votes"];
           curr_vid = data["Curr_Vid"];
@@ -125,17 +155,22 @@
 
           var i;
           var listnodupes = ArrNoDupe(data["Users"]);   
+
           for(i = 0; i < listnodupes.length; i++){
             $("#userlist").append("<li class='user'><h3><small>"+listnodupes[i]+"</small></h3></li>");
           }
+
+          
           firstinit = true;
         }
       });
 
-      socket.on('user added', function(username, user_list){
+      socket.on('user added', function(username){
         $("#messages").append("<li style='text-align:center;'><b>"+username+" joined the room</b></li>");
         $("#userlist").append("<li class='user'><h3><small>"+username+"</small></h3></li>");
         document.getElementById("votes").innerHTML = votes;
+        if(curr_vid != '')
+          player.loadVideoById(curr_vid);
       });
 
       socket.on('user left', function(username){
@@ -159,12 +194,6 @@
       socket.on('update votes',function(data){
         votes = data;
         document.getElementById("votes").innerHTML = votes;
-        console.log(votes);
-        console.log(Math.ceil(users.length/2));
-        if( votes == Math.ceil(users.length/2) ){
-          console.log("next video");
-          socket.emit('nextvideo');
-        }
       });
 
 
@@ -205,6 +234,7 @@
         socket.emit('leave');
       }
 
+
       function ArrNoDupe(a) {
         var temp = {};
         for (var i = 0; i < a.length; i++)
@@ -237,23 +267,7 @@
           }
       }
 
-      var tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      var firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-      var player;
-
-      function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-          height: $('#player-container').height(),
-          width: $('#player-container').width(),
-          events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-          }
-        });
-      }
+      
 
       // 4. The API will call this function when the video player is ready.
       function onPlayerReady(event) {
@@ -285,7 +299,6 @@
             }
             else
               socket.emit('update curr vid',"");
-              document.getElementById("btn-voteskip").disabled = true;
         }
       }
 
@@ -300,6 +313,8 @@
         }
         else{
           socket.emit("queue video", url);
+          
+          //getVideoInfo(url);
         }
       });
 
@@ -322,8 +337,17 @@
         player.playVideo();
       });
 
+      socket.on('add to queue', function(playlist){
+        queue = playlist;
+        getVideoInfo(playlist[playlist.length-1]);
+      });
+
       socket.on('update queue', function(playlist) {
         queue = playlist;
+        //getVideoInfo(playlist[playlist.length-1]);
+        var playlist2 = document.getElementById("playlist");
+        var child = playlist2.firstElementChild;
+        playlist2.removeChild(child);
       });
 
       socket.on('load next video', function(id){
@@ -340,6 +364,41 @@
         document.getElementById("btn-voteskip").disabled = false;
       });
 
+      socket.on('load playlist', function(playlist){
+        if(!firstplaylistinit){
+          console.log(playlist);
+          var i;
+          for(i = 0; i < playlist.length; i++){
+            getVideoInfo(playlist[i]);
+          } 
+          firstplaylistinit = true;
+        } 
+      });
+
+      function getVideoInfo(id) {
+        return gapi.client.youtube.videos.list({
+          "part": "snippet",
+          "id": id
+        })
+            .then(function(response) {
+                    // Handle the results here (response.result has the parsed body).
+                    var result = response.result;
+                    var image = result.items[0].snippet.thumbnails.medium.url;
+                    var title = result.items[0].snippet.localized.title;
+                    var author = result.items[0].snippet.channelTitle;
+                    var authorId = result.items[0].snippet.channelId;
+                    var url = "https://www.youtube.com/watch?v=" + id;
+                    var channelurl = "https://www.youtube.com/channel/" + authorId;
+                    //<li><img src="//img.youtube.com/vi/'+id+'/0.jpg" class="thumbnail"><p>'+result.items[0].snippet.localized.title+'</p></li>
+                    //'+result.items[0].snippet.localized.title+'
+                    $("#playlist").append(
+                      '<li><div class="playlist-title"><a href="'+url+'"><span>'+title+'</span></a></div><div class="video-info"><div><a href="'+url+'"><img src='+image+' class="thumbnail"></a></div><div class="author"><a href="'+channelurl+'"><b>By: </b>'+author+'</a></div></div></li>');
+                    console.log("Response", response);
+                  },
+                  function(err) { console.error("Execute error", err); });
+      }
+
     </script>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
   </body>
 </html>

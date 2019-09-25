@@ -1,5 +1,6 @@
 import os
 import json
+import math
 from flask import (
     Flask, session, Blueprint, flash, g, redirect, render_template, request, url_for
 )
@@ -91,6 +92,7 @@ def adduser(username):
     print(room_list[room])
     emit('user added', username, room=room)
     emit('update users', room_list[room]["Users"], room=room)
+    emit('load playlist', room_list[room]["Queue"], room=room)
 
 @socketio.on('video paused')
 def pausevideo():
@@ -115,7 +117,7 @@ def queuevideo(url):
     room = session.get('room')
     room_list[room]["Queue"].append(url)
     print(room_list[room])
-    emit('update queue', room_list[room]["Queue"], room=room)
+    emit('add to queue', room_list[room]["Queue"], room=room)
 
 @socketio.on('nextvideo')
 def nextvideo():
@@ -146,8 +148,18 @@ def loadvideo(url):
 def vote():
     room = session.get('room')
     room_list[room]["Votes"] += 1
-    print(room_list[room])
-    emit('update votes', room_list[room]["Votes"], room=room)
+    votes = room_list[room]["Votes"]
+    numusers = len(room_list[room]["Users"])
+    if votes == math.ceil(numusers/2):
+        if len(room_list[room]["Queue"]) > 0:
+            next_vid = room_list[room]["Queue"][0]
+            del room_list[room]["Queue"][0]
+            room_list[room]["Votes"] = 0
+            print(room_list[room])
+            emit('load next video', next_vid, room=room)
+            emit('update curr vid client', next_vid, room=room)
+            emit('update queue', room_list[room]["Queue"], room=room)
+            emit('update votes', room_list[room]["Votes"], room=room)
 
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')
