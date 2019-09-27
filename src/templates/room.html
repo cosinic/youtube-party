@@ -4,7 +4,7 @@
     <title>Youtube Party - Watch with your friends</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700' rel='stylesheet' type='text/css'>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.slim.js"></script>
     
     <link rel="stylesheet" href="{{ url_for('static', filename='style.room.css') }}">
     <!--<link rel="stylesheet" href="../static/style.room.css">-->
@@ -105,7 +105,7 @@
     
     <script type="text/javascript">
       
-      var socket = io.connect('http://127.0.0.1:5000');
+      var socket = io.connect();
       var displayname = "";
       var firstinit = false;
       var firstplaylistinit = false;

@@ -12,7 +12,7 @@ from werkzeug.exceptions import abort
 # create and configure the app
 app = Flask(__name__, instance_relative_config=True)
 app.config['SECRET_KEY'] = 'secret'
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode="eventlet")
 
 # ensure the instance folder exists
 try:
