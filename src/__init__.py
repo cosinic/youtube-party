@@ -12,7 +12,8 @@ from werkzeug.exceptions import abort
 # create and configure the app
 app = Flask(__name__, instance_relative_config=True)
 app.config['SECRET_KEY'] = 'secret'
-socketio = SocketIO(app, async_mode="eventlet")
+socketio = SocketIO(app)
+#socketio = SocketIO(app, async_mode="eventlet")
 
 # ensure the instance folder exists
 try:
@@ -41,6 +42,7 @@ def index():
         #Join Room
         if request.form['action'] == 'join':
             if room_name in room_list:
+                session['room'] = room_name
                 return redirect(url_for('room', room=session.get('room')))
             else:
                 print('Room does not exist')
@@ -66,17 +68,16 @@ def joined():
     print(room_list[room])
     emit('user init', room_list[room], room=room)
     
+    @socketio.on('disconnect')
+    def leave():
+        disconnect()
+    
     
 @socketio.on('leave')
 def left():
-    room = session.get('room')
-    room_list[room]["Users"].remove(session.get('username'))
-    print('User has left')
-    print(room_list[room]["Users"])
-    leave_room(room)
-    emit('user left', session.get('username'), room=room)
-    emit('update users', room_list[room]["Users"], room=room)
+    disconnect()
 
+    
 @socketio.on('text')
 def text(message):
     room = session.get('room')
@@ -155,11 +156,27 @@ def vote():
             next_vid = room_list[room]["Queue"][0]
             del room_list[room]["Queue"][0]
             room_list[room]["Votes"] = 0
+            room_list[room]["Curr_Vid"] = next_vid
             print(room_list[room])
             emit('load next video', next_vid, room=room)
             emit('update curr vid client', next_vid, room=room)
             emit('update queue', room_list[room]["Queue"], room=room)
-            emit('update votes', room_list[room]["Votes"], room=room)
+    emit('update votes', room_list[room]["Votes"], room=room)
+
+def disconnect():
+    room = session.get('room')
+    if session.get('username') is not None:
+        room_list[room]["Users"].remove(session.get('username'))
+        print('User has left')
+        print(room_list[room])
+        leave_room(room)
+        emit('user left', session.get('username'), room=room)
+        emit('update users', room_list[room]["Users"], room=room)
+        if len(room_list[room]["Users"]) <= 0:
+            del room_list[room]
+            print(room_list)
+        
+
 
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')

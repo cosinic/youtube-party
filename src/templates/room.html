@@ -187,11 +187,13 @@
 
       socket.on('connect',function(){
         socket.emit('join');
+
+        socket.on('disconnect',function(){
+          socket.emit('leave');
+        });
       });
 
-      socket.on('disconnect',function(){
-        socket.emit('leave');
-      });
+      
 
       socket.on('update users',function(data){
         users = data;
