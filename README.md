@@ -13,7 +13,7 @@ Run these commands to pull and restart the server with newest commits.
 First, `cd /home/daven/youtube-party` in order to get to the right place.  
 Then run the following:  
 
-> git pull
+> git pull  
 > sudo systemctl stop ytparty  
 
 Then wait for it to be done. If it hangs, press Ctrl+C and move to next step.  
