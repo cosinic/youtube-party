@@ -33,7 +33,7 @@ def index():
         #Make Room
         if request.form['action'] == 'make':     
             if room_name not in room_list:
-                room_list[room_name] = { "Users": [], "Curr_Vid": "", "Queue": [], "Votes": 0}
+                room_list[room_name] = { "Users": [], "Curr_Vid": "", "Queue": [], "Votes": 0, "Curr_Time": 0}
                 session['room'] = room_name
                 return redirect(url_for('room', room=session.get('room')))
             else:
@@ -94,6 +94,13 @@ def adduser(username):
     emit('user added', username, room=room)
     emit('update users', room_list[room]["Users"], room=room)
     emit('load playlist', room_list[room]["Queue"], room=room)
+
+@socketio.on('update curr time')
+def updateCurrTime(time):
+    room = session.get('room')
+    room_list[room]["Curr_Time"] = time
+    print(room_list[room])
+    emit('set curr time', time, room=room)
 
 @socketio.on('video paused')
 def pausevideo():

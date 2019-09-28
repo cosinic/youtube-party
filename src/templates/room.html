@@ -112,6 +112,7 @@
       var users;
       var queue;
       var curr_vid;
+      var curr_time;
       var votes;
       var ytinit = false;
 
@@ -148,13 +149,14 @@
       });
 
       socket.on('user init', function(data){
+        console.log('User has joined');
         if(!firstinit){
           //Initialize variables to match server's
           votes = data["Votes"];
           curr_vid = data["Curr_Vid"];
           queue = data["Queue"];
-          users = data["Users"]
-
+          users = data["Users"];
+          
           if(curr_vid == "")
             document.getElementById("btn-voteskip").disabled = true;
 
@@ -164,9 +166,12 @@
           for(i = 0; i < listnodupes.length; i++){
             $("#userlist").append("<li class='user'>"+listnodupes[i]+"</li>");
           }
-
-          
           firstinit = true;
+        }
+        if(displayname == users[0]){
+          if(player.getPlayerState() != -1){
+            socket.emit('update curr time', player.getCurrentTime());
+          }
         }
       });
 
@@ -176,6 +181,8 @@
         document.getElementById("votes").innerHTML = votes;
         if(curr_vid != ''){
           player.loadVideoById(curr_vid);
+          console.log("Player seeking to time: " + curr_time);
+          player.seekTo(curr_time);
           updateVideoInfo(curr_vid);
         }
       });
@@ -193,10 +200,14 @@
         });
       });
 
-      
+      socket.on('set curr time', function(time){
+        curr_time = time;
+        console.log("Current time: " + curr_time);
+      });
 
       socket.on('update users',function(data){
         users = data;
+        console.log(users);
         document.getElementById("votes_required").innerHTML = "/ " + Math.ceil(((users.length)/2));
       });
 
@@ -231,6 +242,7 @@
           socket.emit('add user', name);
           $('#exampleModal').modal('hide');
           displayname = name;
+          console.log(displayname);
         }
       });
 
@@ -295,11 +307,12 @@
             socket.emit('video paused');
             lastEventTime = new Date();
             break;
-          case YT.PlayerState.PLAYING:
+          case YT.PlayerState.PLAYING: 
             socket.emit('video played');
             lastEventTime = new Date();
             break;
           case YT.PlayerState.BUFFERING:
+           
             socket.emit('video buffering', player.getCurrentTime());
             break;
           case YT.PlayerState.ENDED:
