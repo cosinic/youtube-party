@@ -114,7 +114,7 @@
       var curr_vid;
       var curr_time;
       var votes;
-      var ytinit = false;
+      var yt_first_buffer = true;
 
       var tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
@@ -313,13 +313,14 @@
             socket.emit('video played');
             lastEventTime = new Date();
             //console.log("ytinit set to " + ytinit );
-            ytinit = true;
             break;
           case YT.PlayerState.BUFFERING: 
             //console.log(ytinit);
-            if(ytinit){
+            if(!yt_first_buffer){
               console.log('player buffering to: ' + player.getCurrentTime());
               socket.emit('video buffering', player.getCurrentTime());
+            } else {
+              yt_first_buffer = false;
             }
             break;
           case YT.PlayerState.ENDED:
