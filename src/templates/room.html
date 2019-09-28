@@ -304,6 +304,7 @@
       var lastBufferingTime = new Date();
       var expectedEvent;
       function onPlayerStateChange(event) {  
+        console.log(event.data);
         switch(event.data){
           case YT.PlayerState.PAUSED:
             socket.emit('video paused');
@@ -448,6 +449,7 @@
                     $("#video-info").empty();
                     $("#video-info").append('<li><a href="'+url+'"><h4>'+title+'</h4></a></li>');
                     $("#video-info").append('<li><b>By: </b><a href="'+channelurl+'">'+author+'</a></li>');
+                    yt_first_buffer = true;
                     console.log("Response", response);
                   },
                   function(err) { console.error("Execute error", err); });
