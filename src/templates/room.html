@@ -139,7 +139,7 @@
         gapi.client.setApiKey("AIzaSyBJ4Uk1LMDbRiDwWP_pxK0B_v5ukiXuVkE");
         gapi.client.load("youtube", "v3", function(){
           // yt api is ready
-          console.log('Youtube API is ready');
+          console.log('Youtube Data Ready');
         });
       }
 
@@ -180,10 +180,12 @@
         $("#userlist").append("<li class='user'>"+username+"</li>");
         document.getElementById("votes").innerHTML = votes;
         if(curr_vid !== ''){
-          player.loadVideoById(curr_vid);
+          player.loadVideoById(curr_vid, curr_time);
           console.log("Player seeking to time: " + curr_time);
-          player.seekTo(curr_time);
+          //player.seekTo(curr_time);
+          //player.playVideo();
           updateVideoInfo(curr_vid);
+          
         }
       });
 
@@ -310,10 +312,15 @@
           case YT.PlayerState.PLAYING: 
             socket.emit('video played');
             lastEventTime = new Date();
+            //console.log("ytinit set to " + ytinit );
+            ytinit = true;
             break;
-          case YT.PlayerState.BUFFERING:
-           
-            socket.emit('video buffering', player.getCurrentTime());
+          case YT.PlayerState.BUFFERING: 
+            //console.log(ytinit);
+            if(ytinit){
+              console.log('player buffering to: ' + player.getCurrentTime());
+              socket.emit('video buffering', player.getCurrentTime());
+            }
             break;
           case YT.PlayerState.ENDED:
             if(queue.length > 0){
@@ -321,6 +328,7 @@
             }
             else
               socket.emit('update curr vid',"");
+            break;
         }
       }
 
