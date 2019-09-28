@@ -1,5 +1,5 @@
 # YoutubeParty
-[https://party.cosinic.com/]
+https://party.cosinic.com/
 
 # Requirements
 You should have Docker installed and configured correctly (i.e. creating and connecting to machines functions correctly)
