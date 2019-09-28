@@ -157,7 +157,7 @@
           queue = data["Queue"];
           users = data["Users"];
           
-          if(curr_vid == "")
+          if(curr_vid === "")
             document.getElementById("btn-voteskip").disabled = true;
 
           var i;
@@ -168,8 +168,8 @@
           }
           firstinit = true;
         }
-        if(displayname == users[0]){
-          if(player.getPlayerState() != -1){
+        if(displayname === users[0]){
+          if(player.getPlayerState() !== -1){
             socket.emit('update curr time', player.getCurrentTime());
           }
         }
@@ -179,7 +179,7 @@
         $("#messages").append("<li style='text-align:center;'><b>"+username+" joined the room</b></li>");
         $("#userlist").append("<li class='user'>"+username+"</li>");
         document.getElementById("votes").innerHTML = votes;
-        if(curr_vid != ''){
+        if(curr_vid !== ''){
           player.loadVideoById(curr_vid);
           console.log("Player seeking to time: " + curr_time);
           player.seekTo(curr_time);
@@ -219,7 +219,7 @@
 
 
       $('#sendbutton').on('click',function(){
-        if($('#myMessage').val() != ""){
+        if($('#myMessage').val() !== ""){
           text = $('#myMessage').val();
           $('#myMessage').val('');
           socket.emit('text',text);
@@ -227,7 +227,7 @@
       });
 
       $('#myMessage').keydown(function(event){
-        if(event.keyCode == 13){
+        if(event.keyCode === 13){
           event.preventDefault();
           document.getElementById('sendbutton').click();
         }
@@ -237,7 +237,7 @@
 
       $('#modalForm').submit(function(event){
         event.preventDefault();
-        if($('#username').val() != ""){
+        if($('#username').val() !== ""){
           name = $('#username').val();
           socket.emit('add user', name);
           $('#exampleModal').modal('hide');
@@ -274,7 +274,7 @@
 
         for(var counter = 0; counter < length; counter ++)
         {
-            if (elements[counter].textContent == query )
+            if (elements[counter].textContent === query )
             {
                 myList.removeChild(myList.children[ (counter) ]);
                 // better: myList.removeChild(elements[counter]);
@@ -327,16 +327,19 @@
       $('#queue-form').submit(function(event){
         event.preventDefault();
         var re = /youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?/;
-        if(re.exec($('#video-url').val())){
-          var url = $('#video-url').val().split('v=')[1];
+        var video_url = $('#video-url').val();
+        if(re.exec(video_url)){
+          //youtube.com/watch?v=asdsadsadasd&t=123123
+          //youtube.com/watch?time_stamp=123123&v=adssadsad
+          var video_code = video_url.split('v=')[1].replace(/\&.*$/g, '');
           $('#video-url').val('');
           //If no video is currently playing
-          if(curr_vid == ""){
-            socket.emit('load video', url);
-            socket.emit('update curr vid',url);
+          if(curr_vid === ""){
+            socket.emit('load video', video_code);
+            socket.emit('update curr vid', video_code);
           }
           else{
-            socket.emit("queue video", url);
+            socket.emit("queue video", video_code);
             
             //getVideoInfo(url);
           }
@@ -360,7 +363,7 @@
       });
       */
       function onPlayerReady(event){
-        if(player.getVideoUrl() == 'https://www.youtube.com/watch' && [].length > 0){
+        if(player.getVideoUrl() === 'https://www.youtube.com/watch' && [].length > 0){
           player.cueVideoById([][0].link.split('v=')[1]);
         }
       }
